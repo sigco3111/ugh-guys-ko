@@ -1,98 +1,89 @@
-# Shadow of the Watchers
+# Shadow of the Watchers — 한국어판
 
-> An ancient-apocalyptic, browser-based real-time strategy game. Command one of three asymmetric factions across a mythic, pre-flood wasteland — build an economy, raise an army, and shatter your enemy before they shatter you.
+> 대홍수 이전 시대를 배경으로 하는 브라우저 실시간 전략(RTS) 게임. 세 개의 비대칭 진영 중 하나를 지휘해 자원을 모으고, 군대를 키우고, 적의 본거지를 무너뜨리세요.
 
-[![Deploy](https://github.com/atxgreene/Ugh-Guys-/actions/workflows/deploy.yml/badge.svg)](https://github.com/atxgreene/Ugh-Guys-/actions/workflows/deploy.yml)
-![Three.js](https://img.shields.io/badge/Three.js-r165-000000?logo=three.js&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 ![License: CC0-1.0](https://img.shields.io/badge/License-CC0%201.0-lightgrey.svg)
 ![Assets](https://img.shields.io/badge/assets-100%25%20procedural-orange)
 
-**[▶ Play it in your browser](https://atxgreene.github.io/Ugh-Guys-/)**
+**[▶ 브라우저에서 바로 플레이](https://sigco3111.github.io/ugh-guys-ko/)**
+
+원작: **[atxgreene/Ugh-Guys-](https://github.com/atxgreene/Ugh-Guys-)** (CC0-1.0, 퍼블릭 도메인). 이 저장소는 원작을 한국어로 번역한 한글화 포크입니다.
+
+![한국어 메인 메뉴](docs/screenshots/screenshot-menu.png)
+![한국어 인게임 화면](docs/screenshots/screenshot-game.png)
 
 ---
 
-## Overview
+## 한글화 내용
 
-Shadow of the Watchers is a complete, StarCraft-style RTS built from scratch with **Three.js** and **Vite** — set in a mythic, pre-flood world of fallen Watchers, giant clans, and bronze-age city-states. There is no game engine, no external art, no audio files, and no copyrighted IP — only the genre's bones: a worker economy, fog of war, tech trees, asymmetric factions, and an AI that comes for your base. Every model, every sound, and the entire map are generated procedurally in code.
+- 메인 메뉴, 진영 소개, 난이도/모드 선택, 캠페인, 설정, 도움말, 인게임 HUD와 튜토리얼 안내까지 한국어로 번역했습니다.
+- 설정에서 **언어 / Language**를 전환할 수 있습니다(한국어 / English).
+- 한글 폰트(Apple SD Gothic Neo, Malgun Gothic, Noto Sans KR)를 폰트 스택에 추가해 한글이 깨지지 않게 했습니다.
+- 번역은 i18n 사전 모듈(`src/i18n*.js`)로 분리되어 있어 원문과 나란히 관리합니다.
 
-## The Three Factions
+## 게임 소개
 
-Each faction is genuinely asymmetric — different units, buildings, upgrade trees, costs, and a distinct path to victory.
+Shadow of the Watchers는 **Three.js**와 **Vite**로 처음부터 만든 스타크래프트풍 RTS입니다. 별도의 게임 엔진, 외부 아트, 오디오 파일, 저작권 자산 없이 모든 모델·사운드·맵을 코드로 절차 생성합니다.
 
-| Faction | Identity | Plays toward |
+### 세 진영
+
+| 진영 | 정체성 | 플레이 스타일 |
 | --- | --- | --- |
-| **The Covenant Cities** | Priest-king city-states | Balanced economy, defense, and counters |
-| **The Watcher Remnant** | Disciples of the fallen Watchers | Elite units and forbidden tech |
-| **The Nephilim Clans** | Giant-blooded raiders | Brutal melee and base-breaking |
+| **언약의 도시들** | 제사장-왕 도시 국가 | 균형 잡힌 경제, 방어, 카운터 |
+| **감시자 잔당** | 타락한 감시자의 추종자 | 정예 유닛과 금단의 기술 |
+| **네필림 부족** | 거인 혈통 약탈자 | 잔혹한 근접전과 기지 파괴 |
 
-## Features
+### 주요 특징
 
-- **Asymmetric 3-faction design** — unique rosters, buildings, and balance per faction
-- **Full economy & production** — resource gathering, build queues, tech upgrades, supply
-- **A* pathfinding** with line-of-sight smoothing and soft, physics-based unit separation
-- **Fog of war** — persistent discovery with real-time visibility and minimap integration
-- **Procedural terrain** — deterministic noise, flattened base sites, a central ridge with passes, and mountainous borders
-- **Reactive AI opponent** — manages workers, follows build orders, scouts, defends, and escalates attacks
-- **Procedural low-poly models** with emissive accents for faction identity
-- **Synth audio** — UI and combat sounds generated live via the WebAudio API (zero audio files)
-- **Neutral guard posts** — leashed units that defend resource nodes, then return home
+- 진영별 고유 유닛·건물·밸런스의 비대칭 3진영 디자인
+- 자원 채취, 생산 대기열, 기술 업그레이드, 보급의 완전한 경제·생산
+- A* 경로 탐색, 시야 스무딩, 물리 기반 유닛 분리
+- 지속 발견형 전장의 안개와 미니맵 연동
+- 절차 생성 지형과 결정적 노이즈
+- 경제·정찰·방어·공격을 수행하는 반응형 AI 상대
+- WebAudio API로 실시간 합성하는 사운드(오디오 파일 0개)
 
-## Controls
+### 조작
 
-| Input | Action |
+| 입력 | 동작 |
 | --- | --- |
-| **Left-click** | Select a unit or building |
-| **Left-click + drag** | Box-select your units (prefers soldiers over workers) |
-| **Right-click** | Move / gather / attack / set rally / resume construction |
-| **WASD**, **arrow keys**, or **screen edge** | Pan the camera |
-| **Q / E** or **middle-drag** | Rotate the camera |
-| **Mouse wheel** | Zoom |
-| **F** | Attack-move |
-| **X** | Stop |
-| **B** | Build menu (workers) · **Esc** cancels |
-| **H** | Center on your base |
-| **Ctrl + number** | Assign a control group · **number** recalls it |
+| **왼쪽 클릭** | 유닛·건물 선택 |
+| **왼쪽 클릭 + 드래그** | 박스 선택(일꾼보다 병사 우선) |
+| **오른쪽 클릭** | 이동 / 채취 / 공격 / 집결지 설정 / 건설 재개 |
+| **WASD**, **방향키**, **화면 가장자리** | 카메라 이동 |
+| **Q / E** 또는 **가운데 드래그** | 카메라 회전 |
+| **마우스 휠** | 줌 |
+| **F** | 공격 이동 |
+| **X** | 정지 |
+| **B** | 건설 메뉴(일꾼) · **Esc** 취소 |
+| **H** | 본진으로 화면 이동 |
+| **Ctrl + 숫자** | 부대 지정 · **숫자**로 호출 |
 
-Right-click the minimap to order moves; left-click/drag it to pan the camera.
-
-## Run locally
+## 로컬 실행
 
 ```bash
-git clone https://github.com/atxgreene/Ugh-Guys-.git
-cd Ugh-Guys-
+git clone https://github.com/sigco3111/ugh-guys-ko.git
+cd ugh-guys-ko
 npm install
-npm run dev      # Vite prints a local URL to open
+npm run dev      # Vite가 로컬 URL을 출력합니다
 ```
 
-Build a production bundle:
+프로덕션 빌드:
 
 ```bash
-npm run build    # outputs static files to dist/
-npm run preview  # serve the built bundle locally
+npm run build    # dist/에 정적 파일 출력
+npm run preview  # 빌드 결과를 로컬에서 서빙
 ```
 
-The build output in `dist/` is plain static files, so it also deploys to Vercel, Netlify, or any static host.
+## 배포
 
-## Project structure
+`main`에 푸시하면 [GitHub Actions 워크플로](.github/workflows/pages.yml)가 Vite 빌드 후 GitHub Pages에 배포합니다: **https://sigco3111.github.io/ugh-guys-ko/**
 
-| Path | Responsibility |
-| --- | --- |
-| `src/main.js` | Main menu, faction selection, game lifecycle |
-| `src/game.js` | Core engine — entities, combat, economy, production, win/loss |
-| `src/data.js` | Faction definitions: units, buildings, upgrade trees |
-| `src/models.js` | Procedural low-poly meshes |
-| `src/terrain.js` | Procedural map generation |
-| `src/pathfinding.js` | A* pathfinding + line-of-sight smoothing |
-| `src/controls.js` | Camera rig, selection, orders, placement |
-| `src/ai.js` | Enemy AI — economy, army, scouting, attack waves |
-| `src/ui.js` | HUD, minimap, selection panels, command buttons |
-| `src/audio.js` | WebAudio synth |
+## 검증 상태와 외부 의존성
 
-## Deployment
+- **검증 완료**: 싱글플레이 부팅, 유닛 생성, 시뮬레이션 진행, 한국어 UI 표시를 실제 배포 페이지에서 확인했습니다(위 스크린샷).
+- **미검증**: 멀티플레이(베타)는 외부 릴레이 서버가 필요한 기능으로, 이번 한글화 검증 범위에서는 실제 외부 서버 접속을 시도하지 않았습니다. 원작의 기본 동작(버튼 표시 조건 등)은 그대로 유지했습니다.
 
-Every push to `main` triggers the [GitHub Actions workflow](.github/workflows/deploy.yml), which builds the Vite bundle and publishes it to GitHub Pages at **https://atxgreene.github.io/Ugh-Guys-/**.
+## 라이선스
 
-## License
-
-Released under the [CC0-1.0](LICENSE) license — public domain. Do anything you like with it.
+원작과 동일하게 [CC0-1.0](LICENSE) — 퍼블릭 도메인입니다. 원작자 크레딧: atxgreene.
