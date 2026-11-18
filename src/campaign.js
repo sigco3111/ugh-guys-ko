@@ -11,6 +11,7 @@
 // Convenience: a mission's per-game scratchpad is game._camp (missions never store their
 // own state, so a mission object is reusable across playthroughs).
 import { Sound } from './audio.js';
+import { L } from './i18n.js';
 
 const scratch = (g) => g._camp;
 
@@ -37,7 +38,7 @@ export const MISSIONS = [
     ],
     objectiveText(g) {
       const left = g.units.filter(u => u.owner === g.NEUTRAL && !u.dead && u.def.attack).length;
-      return scratch(g).raidersDone ? `Destroy the raiders — ${left} remain` : 'Build a barracks and train soldiers';
+      return scratch(g).raidersDone ? L(`Destroy the raiders — ${left} remain`, `약탈자 섬멸 - ${left}명 남음`) : 'Build a barracks and train soldiers';
     },
     win(g) { return scratch(g).raidersDone && g.units.filter(u => u.owner === g.NEUTRAL && !u.dead && u.def.attack).length === 0; },
   },
@@ -129,12 +130,12 @@ export const MISSIONS = [
         for (let i = 0; i < n; i++) g.spawnRaider('devourer', bp.x + (i % 2 ? 24 : -24), bp.y + (i * 3 - n), mult);
         if (boss) g.spawnRaider(boss, bp.x + 22, bp.y - 6, mult);
         Sound.wave(k + 1);
-        g.emit('toast', `🌊 Wave ${k + 1} breaks upon your walls${boss ? ' — a champion of the deep leads it!' : ''}.`);
+        g.emit('toast', L(`🌊 Wave ${k + 1} breaks upon your walls${boss ? ' — a champion of the deep leads it!' : ''}.`, `🌊 웨이브 ${k + 1}이(가) 성벽을 덮칩니다${boss ? ' - 심해의 용사가 이끕니다!' : ''}`));
       },
     })),
     objectiveText(g) {
       const left = Math.max(0, 360 - Math.floor(g.time));
-      return `Survive the Flood — ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} remain (wave ${scratch(g).waves || 0})`;
+      return L(`Survive the Flood — ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} remain (wave ${scratch(g).waves || 0})`, `홍수에서 살아남기 - ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} 남음 (웨이브 ${scratch(g).waves || 0})`);
     },
     win(g) { return g.time >= 360; },
   },

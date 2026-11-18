@@ -11,6 +11,7 @@ import { LockstepSession, WebSocketTransport } from './net.js';
 import { initDiscord, isDiscordActivity } from './discord.js';
 import { onGameOver as achievementsOnGameOver, recordsSummary } from './achievements.js';
 import { MISSIONS, missionById, missionIndex } from './campaign.js';
+import { initI18n, T, L, setLang, getLang } from './i18n.js';
 
 const TRAITS = {
   covenant: 'Balanced economy · strong defenses · disciplined bronze infantry · temple favor',
@@ -112,12 +113,12 @@ function showCampaign() {
   if (!ov) return;
   const prog = campaignProgress();
   const done = MISSIONS.filter(m => prog[m.id]).length;
-  document.getElementById('camp-head').textContent = `The Chronicle of the Fields — ${done}/${MISSIONS.length} won`;
+  document.getElementById('camp-head').textContent = L(`The Chronicle of the Fields — ${done}/${MISSIONS.length} won`, `들녘의 연대기 — ${done}/${MISSIONS.length} 클리어`);
   document.getElementById('camp-list').innerHTML = MISSIONS.map(m => {
     const unlocked = missionUnlocked(m.id), complete = !!prog[m.id];
     const state = complete ? '✦' : unlocked ? '▸' : '🔒';
     return `<button class="camp-mission ${unlocked ? '' : 'locked'} ${complete ? 'done' : ''}" data-id="${m.id}" ${unlocked ? '' : 'disabled'}>
-      <span class="camp-act">Act ${m.act}</span>
+      <span class="camp-act">${L(`Act ${m.act}`, `제${m.act}막`)}</span>
       <span class="camp-name">${state} ${m.name}</span>
       <span class="camp-obj">${m.objective}</span></button>`;
   }).join('');
@@ -131,11 +132,11 @@ function showCampaign() {
 function showBriefing(id) {
   const m = missionById(id); if (!m) return;
   const ov = document.getElementById('briefing');
-  document.getElementById('brief-act').textContent = `Act ${m.act}`;
+  document.getElementById('brief-act').textContent = L(`Act ${m.act}`, `제${m.act}막`);
   document.getElementById('brief-name').textContent = m.name;
   document.getElementById('brief-text').textContent = m.brief;
-  document.getElementById('brief-obj').textContent = `Objective: ${m.objective}`;
-  document.getElementById('brief-faction').textContent = `You lead: ${FACTIONS[m.faction].name}`;
+  document.getElementById('brief-obj').textContent = L(`Objective: ${m.objective}`, `목표: ${m.objective}`);
+  document.getElementById('brief-faction').textContent = L(`You lead: ${FACTIONS[m.faction].name}`, `지휘: ${FACTIONS[m.faction].name}`);
   ov.classList.add('show');
   document.getElementById('brief-begin').onclick = () => { Sound.click(); ov.classList.remove('show'); startCampaignMission(id); };
   document.getElementById('brief-back').onclick = () => { Sound.click(); ov.classList.remove('show'); showCampaign(); };
@@ -159,10 +160,12 @@ function showRecords() {
   const r = recordsSummary();
   const done = r.achievements.filter(a => a.done).length;
   document.getElementById('rec-head').textContent =
-    `🏆 Records — ${done}/${r.achievements.length} achievements`;
+    L(`🏆 Records — ${done}/${r.achievements.length} achievements`, `🏆 기록 — ${done}/${r.achievements.length} 업적`);
   document.getElementById('rec-bests').innerHTML =
-    `<span>🌊 Deepest stand: <b>wave ${r.bestWave}</b></span>` +
-    `<span>☀ Daily Trials: <b>${r.dailyWon}</b> won of <b>${r.dailyDone}</b></span>`;
+    L(`<span>🌊 Deepest stand: <b>wave ${r.bestWave}</b></span>` +
+    `<span>☀ Daily Trials: <b>${r.dailyWon}</b> won of <b>${r.dailyDone}</b></span>`,
+    `<span>🌊 최대 생존: <b>웨이브 ${r.bestWave}</b></span>` +
+    `<span>☀ 오늘의 시련: <b>${r.dailyDone}</b>회 중 <b>${r.dailyWon}</b>회 승리</span>`);
   document.getElementById('rec-list').innerHTML = r.achievements.map(a =>
     `<div class="rec-item ${a.done ? 'done' : ''}"><span class="rec-mark">${a.done ? '✦' : '·'}</span>` +
     `<span><b>${a.name}</b><br><i>${a.desc}</i></span></div>`).join('');
@@ -183,8 +186,9 @@ function refreshContinue() {
   if (hasSave()) {
     btn.style.display = 'inline-block';
     try { const m = JSON.parse(localStorage.getItem(SAVE_KEY)).meta;
-      btn.textContent = `Continue — ${FACTIONS[ (JSON.parse(localStorage.getItem(SAVE_KEY)).data.pf) ]?.name || 'campaign'} · ${Math.floor(m.time/60)}:${String(m.time%60).padStart(2,'0')}`;
-    } catch { btn.textContent = 'Continue Campaign'; }
+      btn.textContent = L(`Continue — ${FACTIONS[ (JSON.parse(localStorage.getItem(SAVE_KEY)).data.pf) ]?.name || 'campaign'} · ${Math.floor(m.time/60)}:${String(m.time%60).padStart(2,'0')}`,
+        `이어하기 — ${FACTIONS[ (JSON.parse(localStorage.getItem(SAVE_KEY)).data.pf) ]?.name || 'campaign'} · ${Math.floor(m.time/60)}:${String(m.time%60).padStart(2,'0')}`);
+    } catch { btn.textContent = T('Continue Campaign'); }
   } else btn.style.display = 'none';
 }
 
@@ -195,7 +199,7 @@ function buildMenu() {
     const card = document.createElement('div');
     card.className = 'fcard ' + f.key;
     card.innerHTML = `<h2 style="color:${f.colorCss}">${f.name}</h2><p>${f.desc}</p>
-      <div class="traits">${TRAITS[f.key]}</div>`;
+      <div class="traits">${T(TRAITS[f.key])}</div>`;
     card.onclick = () => { Sound.click(); startGame(f.key); };
     wrap.appendChild(card);
   }
@@ -246,14 +250,14 @@ function buildMenu() {
   // skirmish setup: opponent + land selectors (Random by default)
   const enemySel = document.getElementById('sel-enemy');
   if (enemySel) {
-    enemySel.innerHTML = '<option value="random">Random</option>' +
+    enemySel.innerHTML = `<option value="random">${T('Random')}</option>` +
       Object.values(FACTIONS).map(f => `<option value="${f.key}">${f.name}</option>`).join('');
     enemySel.value = Settings.get('enemy') || 'random';
     enemySel.onchange = () => Settings.set('enemy', enemySel.value);
   }
   const biomeSel = document.getElementById('sel-biome');
   if (biomeSel) {
-    biomeSel.innerHTML = '<option value="random">Random</option>' +
+    biomeSel.innerHTML = `<option value="random">${T('Random')}</option>` +
       Object.entries(BIOMES).map(([k, b]) => `<option value="${k}">${b.name}</option>`).join('');
     biomeSel.value = Settings.get('biome') || 'random';
     biomeSel.onchange = () => Settings.set('biome', biomeSel.value);
@@ -262,7 +266,7 @@ function buildMenu() {
   if (sizeSel) {
     const labels = { standard: 'Standard', large: 'Large', huge: 'Huge' };
     sizeSel.innerHTML = Object.keys(MAP_SIZES).map(k =>
-      `<option value="${k}">${labels[k] || k} (${MAP_SIZES[k]}×${MAP_SIZES[k]})</option>`).join('');
+      `<option value="${k}">${T(labels[k] || k)} (${MAP_SIZES[k]}×${MAP_SIZES[k]})</option>`).join('');
     sizeSel.value = MAP_SIZES[Settings.get('mapSize')] ? Settings.get('mapSize') : 'standard';
     sizeSel.onchange = () => Settings.set('mapSize', sizeSel.value);
   }
@@ -270,14 +274,14 @@ function buildMenu() {
   const oppSel = document.getElementById('sel-opponents');
   if (oppSel) {
     oppSel.innerHTML = [1, 2, 3].map(n =>
-      `<option value="${n}">${n} (${n + 1}-player${n > 1 ? ' free-for-all' : ''})</option>`).join('');
+      `<option value="${n}">${n} (${L(`${n + 1}-player${n > 1 ? ' free-for-all' : ''}`, `${n + 1}인${n > 1 ? ' 난투전' : '전'}`)})</option>`).join('');
     oppSel.value = String(opponentCount());
     oppSel.onchange = () => Settings.set('opponents', oppSel.value);
   }
   // mode: classic skirmish, or The Deluge (survive escalating monster waves)
   const modeSel = document.getElementById('sel-mode');
   if (modeSel) {
-    modeSel.innerHTML = '<option value="standard">Skirmish</option><option value="survival">The Deluge (survival)</option>';
+    modeSel.innerHTML = `<option value="standard">${T('Skirmish')}</option><option value="survival">${T('The Deluge (survival)')}</option>`;
     modeSel.value = selectedMode();
     const syncMode = () => {
       // opponent pickers mean nothing against the flood
@@ -293,8 +297,8 @@ function buildMenu() {
   if (daily) {
     const cfg = dailyConfig();
     const done = (Settings.get('daily') || {})[cfg.date];
-    daily.textContent = `☀ Daily Trial — ${cfg.date}` +
-      (done ? (done.won ? ' ✓ won' : cfg.mode === 'survival' ? ` (wave ${done.wave})` : ' (fell)') : '');
+    daily.textContent = L(`☀ Daily Trial — ${cfg.date}`, `☀ 오늘의 시련 — ${cfg.date}`) +
+      (done ? (done.won ? L(' ✓ won', ' ✓ 승리') : cfg.mode === 'survival' ? L(` (wave ${done.wave})`, ` (웨이브 ${done.wave})`) : L(' (fell)', ' (패배)')) : '');
     daily.onclick = () => {
       Sound.click();
       window.__forceOpts = { seed: cfg.seed, biome: cfg.biome, timeOfDay: cfg.timeOfDay,
@@ -471,7 +475,7 @@ function relayReady() {
     'or run a local relay and paste ws://localhost:8787 into Advanced.');
   return false;
 }
-function mpStatus(t) { const s = document.getElementById('mp-status'); if (s) s.textContent = t || ''; }
+function mpStatus(t) { const s = document.getElementById('mp-status'); if (s) s.textContent = t ? T(t) : ''; }
 function setStage(stage) {
   _mp.stage = stage;
   for (const s of ['choose', 'search', 'room'])
@@ -548,7 +552,7 @@ function ensureTransport(room) {
     if (msg.auto && _mp.stage !== 'room') onQuickMatched();   // paired → drop into a room
     renderPlayers();
     document.getElementById('lobby-chat').style.display = 'block';
-    if (grew && _mp.stage === 'room') appendChat(chatLog, { sys: true, text: `${(msg.names||[])[msg.players.length-1] || 'A player'} joined.` });
+    if (grew && _mp.stage === 'room') appendChat(chatLog, { sys: true, text: L(`${(msg.names||[])[msg.players.length-1] || 'A player'} joined.`, `${(msg.names||[])[msg.players.length-1] || T('A player')} 님이 참가했습니다.`) });
     if (left) appendChat(chatLog, { sys: true, text: 'A player left.' });
   };
   transport.onChat = (msg) => appendChat(chatLog, { from: msg.from, text: msg.text }, _mp.you);
@@ -682,7 +686,7 @@ function renderPlayers() {
     const row = document.createElement('div');
     row.className = `mp-player p${i}` + (i === _mp.you ? ' you' : '') + (present ? '' : ' empty');
     row.innerHTML = `<span class="mp-seat"></span><span class="mp-pname">${name}${fac ? ' · ' + fac : ''}</span>` +
-      (present ? `<span class="mp-rs ${ready ? 'on' : 'off'}">${ready ? '● Ready' : '○ Not ready'}</span>` : '<span class="mp-rs off">—</span>');
+      (present ? `<span class="mp-rs ${ready ? 'on' : 'off'}">${T(ready ? '● Ready' : '○ Not ready')}</span>` : '<span class="mp-rs off">—</span>');
     wrap.appendChild(row);
   }
   const allReady = n >= 2 && _mp.readies.slice(0, n).every(Boolean);
@@ -1143,7 +1147,7 @@ function showCoachHints() {
   let busyUntil = 0;
 
   const display = (text) => {
-    el.textContent = typeof text === 'function' ? text() : text;
+    el.textContent = T(typeof text === 'function' ? text() : text);
     el.classList.add('show');
     busyUntil = performance.now() + 8200;
     clearTimeout(coachHideT);
@@ -1209,6 +1213,14 @@ function bindShell() {
       syncSeg('set-quality', 'q', q);
     });
   }
+  // language (한국어/English) — 설정 패널의 언어 전환
+  for (const b of document.querySelectorAll('#set-lang button')) {
+    b.addEventListener('click', () => {
+      Sound.click();
+      setLang(b.dataset.l);
+      syncSeg('set-lang', 'l', b.dataset.l);
+    });
+  }
   // music on/off
   for (const b of document.querySelectorAll('#set-music button')) {
     b.addEventListener('click', () => {
@@ -1237,7 +1249,7 @@ function bindShell() {
   $('set-tips')?.addEventListener('click', () => {
     Settings.set('coachSeen', false);
     Sound.click();
-    const b = $('set-tips'); if (b) { b.textContent = 'Tips will replay next match ✓'; b.disabled = true; }
+    const b = $('set-tips'); if (b) { b.textContent = T('Tips will replay next match ✓'); b.disabled = true; }
   });
 
   // help / hotkey reference
@@ -1280,7 +1292,8 @@ function syncSettingsUI() {
   syncSeg('set-quality', 'q', Settings.get('quality'));
   syncSeg('set-music', 'm', Settings.get('music') ? 'on' : 'off');
   const tips = $('set-tips');
-  if (tips) { tips.disabled = false; tips.textContent = Settings.get('coachSeen') ? 'Replay tips' : 'Tips armed ✓'; }
+  if (tips) { tips.disabled = false; tips.textContent = Settings.get('coachSeen') ? T('Replay tips') : T('Tips armed ✓'); }
+  syncSeg('set-lang', 'l', getLang());
 }
 
 // test/debug hook: drive deterministic replay playback from a recording object
@@ -1637,8 +1650,10 @@ window.__campaignCheck = (id, seconds = 20, forceWin = false) => {
   if ('serviceWorker' in navigator && !isDiscordActivity()) {
     try { navigator.serviceWorker.register('./sw.js'); } catch (e) { console.warn('SW registration failed', e); }
   }
+  initI18n();
   bindShell();
   buildMenu();
+  window.addEventListener('lang-changed', () => { syncSettingsUI(); if (!current) buildMenu(); else current.ui?.onLangChanged?.(); });
   // Menu ambience: WebAudio can't sound until the user interacts, so on the very first
   // gesture (while still on the menu, no match running) fade in the calm neutral drone.
   const startMenuAmbience = () => {

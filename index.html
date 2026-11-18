@@ -20,7 +20,7 @@
        `manipulation` kills double-tap-to-zoom (without delaying real taps); the game
        canvas takes full gesture ownership; text inputs stay selectable/editable. */
     html, body { width: 100%; height: 100%; overflow: hidden; background: #08080c;
-      font-family: Georgia, 'Times New Roman', serif; color: #d8d2c4;
+      font-family: Georgia, 'Times New Roman', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', serif; color: #d8d2c4;
       touch-action: manipulation; -webkit-text-size-adjust: 100%; }
     input, textarea { -webkit-user-select: text; user-select: text; }
     #app { position: relative; width: 100%; height: 100%; }
@@ -29,9 +29,10 @@
 
     /* ---------- main menu ---------- */
     #menu { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 28px;
+      align-items: center; justify-content: safe center; gap: 20px;
+      overflow-y: auto; padding: 20px 16px;
       background: radial-gradient(ellipse at 50% 30%, #1a1626 0%, #0a0a10 65%, #050507 100%); }
-    #menu h1 { font-size: 52px; letter-spacing: 10px; color: #d8c89a; text-transform: uppercase;
+    #menu h1 { font-size: clamp(30px, 6vh, 52px); letter-spacing: 10px; color: #d8c89a; text-transform: uppercase;
       text-shadow: 0 0 30px rgba(216, 181, 90, 0.35), 0 2px 0 #000; font-weight: normal; }
     #menu .subtitle { color: #8a8294; font-style: italic; letter-spacing: 2px; margin-top: -16px; }
     #menu .choose { color: #b8aa88; letter-spacing: 3px; text-transform: uppercase; font-size: 13px; }
@@ -52,7 +53,7 @@
     .menu-difficulty .seg { display: flex; gap: 6px; }
     .menu-difficulty .seg button { background: linear-gradient(180deg, #2c2519, #1a150d); color: #cdbf9a;
       border: 1px solid #6a4e26; padding: 7px 18px; cursor: pointer; font-family: inherit; border-radius: 4px;
-      font-size: 13px; letter-spacing: 1px; }
+      font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
     .menu-difficulty .seg button.on { background: linear-gradient(180deg, #4a3a24, #2a2014); color: #ffd56e;
       border-color: #e6c074; box-shadow: inset 0 1px 0 rgba(230,192,116,0.25), 0 0 10px rgba(230,192,116,0.18); }
     .menu-setup { display: flex; gap: 28px; align-items: center; }
@@ -686,6 +687,7 @@
         <b>1-9</b> (double-tap to center) · <b>Space</b> jump to alert · <b>H</b> go home<br/>
         Destroy the enemy's seat of power before they destroy yours. Beware what guards the obelisks.
       </div>
+      <div class="orig-credit" style="color:#6a6274;font-size:11px;letter-spacing:0.5px;">원작: <a href="https://github.com/atxgreene/Ugh-Guys-" target="_blank" rel="noopener" style="color:#8a8294;">Shadow of the Watchers</a> by atxgreene (CC0 1.0) · 비공식 한국어판</div>
     </div>
 
     <div class="hud" id="topbar">
@@ -760,6 +762,13 @@
         <div class="set-row">
           <label>Coaching tips</label>
           <button class="seg-btn" id="set-tips">Replay tips</button>
+        </div>
+        <div class="set-row set-toggle">
+          <label style="margin:0">언어 / Language</label>
+          <div class="seg" style="width:160px" id="set-lang">
+            <button data-l="ko">한국어</button>
+            <button data-l="en">English</button>
+          </div>
         </div>
         <button class="set-close" id="set-close">Done</button>
       </div>

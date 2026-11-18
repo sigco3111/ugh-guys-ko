@@ -10,6 +10,7 @@ import { findPath, findNearestWalkable, clearanceFor } from './pathfinding.js';
 import { FACTIONS, UPGRADES, NEUTRALS, MONSTERS, SCOTT, RESOURCE_NODES, START_RES, SUPPLY_CAP,
   FIELDS_OF_EVIL, NEUTRAL_UNIT_DEFS, NEUTRAL_BUILDING_DEFS, EMPOWER } from './data.js';
 import { makeRng } from './rng.js';
+import { L } from './i18n.js';
 import { buildUnitMesh, buildBuildingMesh, buildResourceNode, glowMat, tickGlowMats, buildScaffold, buildFireCluster, buildDoodad } from './models.js';
 import { waterNormalMap } from './textures.js';
 import { ParticlePool } from './fx.js';
@@ -211,7 +212,7 @@ export class Unit extends Entity {
       this.maxHp = Math.round(this.maxHp * grow);
       this.hp = Math.round(this.maxHp * Math.min(1, frac + 0.25));   // level-up also heals
       if (this.owner === this.game.localPlayer) {
-        this.game.emit('toast', `★ ${this.def.name} rises to level ${this.level}!`);
+        this.game.emit('toast', L(`★ ${this.def.name} rises to level ${this.level}!`, `★ ${this.def.name} 레벨 ${this.level} 달성!`));
       }
       if (this.game.map.fogStateAt(this.pos.x, this.pos.z) === 2) {
         this.game.addEffect(this.pos.x, this.pos.z, this.radius * 2.4, glowMat(0xffe08a, 2.2));
@@ -2318,7 +2319,7 @@ export class Game {
         u.maxHp = Math.round(u.maxHp * e.hpMult); u.hp = Math.round(u.maxHp * frac);
       }
     }
-    if (owner === 0) { Sound.upgrade(); this.emit('toast', UPGRADES[key].name + ' complete'); }
+    if (owner === 0) { Sound.upgrade(); this.emit('toast', L(UPGRADES[key].name + ' complete', UPGRADES[key].name + ' 연구 완료')); }
   }
 
   spawnTrained(building, key) {
@@ -2384,7 +2385,7 @@ export class Game {
 
   onBuildingComplete(b) {
     this.recalcSupply();
-    if (b.owner === 0) this.emit('toast', b.def.name + ' complete');
+    if (b.owner === 0) this.emit('toast', L(b.def.name + ' complete', b.def.name + ' 완성'));
     // builders go idle next to it
     for (const u of this.units) if (u.buildSite === b) u.stop();
     this.dressBuilding(b);
@@ -2652,10 +2653,10 @@ export class Game {
         const key = bossKeys[Math.floor(this.rand() * bossKeys.length)];
         spawnAt(MONSTERS[key], key, gates[0]);
       }
-      this.emit('toast', `☠ Wave ${w} — a champion of the Deluge rises. Hold the line.`);
+      this.emit('toast', L(`☠ Wave ${w} — a champion of the Deluge rises. Hold the line.`, `☠ 웨이브 ${w} - 대홍수의 용사가 일어납니다. 전선을 지키세요.`));
       this.addShake(0.5);
     } else {
-      this.emit('toast', `🌊 Wave ${w} breaks upon the land — ${count} horrors march on your walls.`);
+      this.emit('toast', L(`🌊 Wave ${w} breaks upon the land — ${count} horrors march on your walls.`, `🌊 웨이브 ${w}이(가) 대지를 덮칩니다 - 괴물 ${count}마리가 성벽을 향해 진군합니다.`));
     }
     if (this.controls) Sound.alert?.();
   }
@@ -2682,7 +2683,7 @@ export class Game {
       this.slainBosses.push(boss.key);   // records/achievements read this at game end
       Sound.bossSlain();
       const spoils = Object.entries(boss.def.bounty).map(([k, v]) => `${v} ${k}`).join(', ');
-      this.emit('toast', `☠ ${boss.def.name} is slain! Its hoard — ${spoils} — is yours.`);
+      this.emit('toast', L(`☠ ${boss.def.name} is slain! Its hoard — ${spoils} — is yours.`, `☠ ${boss.def.name} 처치! 노획물 - ${spoils} - 이(가) 당신의 것입니다.`));
     }
   }
 
@@ -2751,7 +2752,7 @@ export class Game {
           this.endGame(1, b.pos);   // offline: you're out, the match is over for you
         }
       } else if (b.owner < this.NEUTRAL && b.owner !== this.localPlayer && !alive.includes(b.owner)) {
-        this.emit('toast', `⚑ The ${this.players[b.owner].faction.name} have fallen — ${alive.length} houses remain.`);
+        this.emit('toast', L(`⚑ The ${this.players[b.owner].faction.name} have fallen — ${alive.length} houses remain.`, `⚑ ${this.players[b.owner].faction.name}이(가) 무너졌습니다 - ${alive.length}개 가문이 남았습니다.`));
       }
     }
   }

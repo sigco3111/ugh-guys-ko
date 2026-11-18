@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GRID, TILE, WORLD } from './terrain.js';
 import { RESOURCE_INFO, UPGRADES } from './data.js';
 import { Sound } from './audio.js';
+import { T, L } from './i18n.js';
 
 const UNIT_ICONS = {
   laborer: '⛏', spearman: '🛡', archer: '🏹', chariot: '🐎', temple_guard: '⚔', prophet: '🔥',
@@ -77,7 +78,7 @@ export class UI {
       if (load) load.style.display = saveExists ? 'inline-block' : 'none';
     }
     const bp = document.getElementById('btn-pause');
-    if (bp) bp.textContent = on ? 'Resume' : 'Pause';
+    if (bp) bp.textContent = on ? T('Resume') : T('Pause');
   }
 
   // ---------- minimap ----------
@@ -205,7 +206,7 @@ export class UI {
     for (const k of ['grain', 'timber', 'bronze', 'favor', 'knowledge']) {
       html += `<span class="res" title="${RESOURCE_INFO[k].name}"><b style="color:${RESOURCE_INFO[k].color}">${RESOURCE_INFO[k].icon}</b> ${Math.floor(r[k] || 0)}</span>`;
     }
-    html += `<span class="res" title="Population"><b style="color:#9ad">⌂</b> ${p.supplyUsed}/${p.supplyCap}</span>`;
+    html += `<span class="res" title="${T('Population')}"><b style="color:#9ad">⌂</b> ${p.supplyUsed}/${p.supplyCap}</span>`;
     this.elRes.innerHTML = html;
     const t = Math.floor(this.game.time);
     this.elClock.textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
@@ -240,7 +241,7 @@ export class UI {
     const cmds = [];
     let info = '';
     if (!sel.length) {
-      info = `<div class="sel-name">${this.game.me.faction.name}</div><div class="sel-desc">Select units with left-click / drag. Right-click to command.</div>`;
+      info = `<div class="sel-name">${this.game.me.faction.name}</div><div class="sel-desc">${T('Select units with left-click / drag. Right-click to command.')}</div>`;
       this.buildMenuOpen = false;
     } else if (sel.length === 1) {
       const e = sel[0];
@@ -248,25 +249,25 @@ export class UI {
       const heroRank = e.hero ? ` <span class="hero-rank">★ Lv ${e.level}</span>` : '';
       info = `<div class="sel-name">${e.def.name || e.def.name}${heroRank}</div>`;
       if (e.isResource) {
-        info += `<div class="sel-hp">${Math.floor(e.amount)} remaining</div>`;
+        info += `<div class="sel-hp">${L(`${Math.floor(e.amount)} remaining`, `${Math.floor(e.amount)} 남음`)}</div>`;
       } else {
         info += `<div class="sel-hp">HP ${hp}</div>`;
         if (e.hero && e.level < 5) {
           const need = [0, 12, 30, 56, 92][e.level];
-          info += `<div class="sel-hp" style="color:#c9a86a">XP ${e.xp}/${need} to Lv ${e.level + 1}</div>`;
+          info += `<div class="sel-hp" style="color:#c9a86a">${L(`XP ${e.xp}/${need} to Lv ${e.level + 1}`, `XP ${e.xp}/${need} · 레벨 ${e.level + 1}까지`)}</div>`;
         }
       }
       info += `<div class="sel-desc">${e.def.desc || ''}</div>`;
-      if (e.isBuilding && !e.complete) info += `<div class="sel-hp">Construction ${Math.floor(e.progress * 100)}%</div>`;
+      if (e.isBuilding && !e.complete) info += `<div class="sel-hp">${L(`Construction ${Math.floor(e.progress * 100)}%`, `건설 중 ${Math.floor(e.progress * 100)}%`)}</div>`;
       if (e.isBuilding && e.trainQueue.length) {
         const j = e.trainQueue[0];
         const nm = j.upgrade ? UPGRADES[j.key].name : this.game.players[e.owner].faction.units[j.key].name;
-        info += `<div class="queue">▶ ${nm} <progress value="${j.t}" max="${j.total}"></progress> (+${e.trainQueue.length - 1} queued)</div>`;
+        info += `<div class="queue">▶ ${nm} <progress value="${j.t}" max="${j.total}"></progress> ${L(`(+${e.trainQueue.length - 1} queued)`, `(+${e.trainQueue.length - 1} 대기)`)}</div>`;
       }
     } else {
       const counts = {};
       for (const e of sel) counts[e.def.name] = (counts[e.def.name] || 0) + 1;
-      info = `<div class="sel-name">${sel.length} selected</div><div class="sel-desc">` +
+      info = `<div class="sel-name">${L(`${sel.length} selected`, `${sel.length}개 선택`)}</div><div class="sel-desc">` +
         Object.entries(counts).map(([n, c]) => `${c}× ${n}`).join(', ') + '</div>';
     }
     this.elInfo.innerHTML = info;
@@ -279,13 +280,13 @@ export class UI {
     const faction = this.game.me.faction;
 
     if (units.length) {
-      cmds.push({ icon: '⚔', label: 'Attack-Move (F)', cls: 'cmd-act' + (this.controls?.attackMoveArm ? ' cmd-on' : ''),
-        tip: 'Attack-move — advance and engage everything hostile on the way. Tap/click the destination next.',
-        fn: () => { this.controls.attackMoveArm = true; this.controls.patrolArm = false; this.toast('⚔ Now tap where to attack-move'); this.refreshPanel(); } });
-      cmds.push({ icon: '♺', label: 'Patrol (R)', cls: 'cmd-act' + (this.controls?.patrolArm ? ' cmd-on' : ''),
-        tip: 'Patrol — walk between here and the destination, engaging what appears. Tap/click the far point next.',
-        fn: () => { this.controls.patrolArm = true; this.controls.attackMoveArm = false; this.toast('♺ Now tap the far patrol point'); this.refreshPanel(); } });
-      cmds.push({ icon: '✋', label: 'Stop (X)', cls: 'cmd-act', fn: () => this.game.cmd('stop', { sel: units }) });
+      cmds.push({ icon: '⚔', label: T('Attack-Move (F)'), cls: 'cmd-act' + (this.controls?.attackMoveArm ? ' cmd-on' : ''),
+        tip: T('Attack-move — advance and engage everything hostile on the way. Tap/click the destination next.'),
+        fn: () => { this.controls.attackMoveArm = true; this.controls.patrolArm = false; this.toast(T('⚔ Now tap where to attack-move')); this.refreshPanel(); } });
+      cmds.push({ icon: '♺', label: T('Patrol (R)'), cls: 'cmd-act' + (this.controls?.patrolArm ? ' cmd-on' : ''),
+        tip: T('Patrol — walk between here and the destination, engaging what appears. Tap/click the far point next.'),
+        fn: () => { this.controls.patrolArm = true; this.controls.attackMoveArm = false; this.toast(T('♺ Now tap the far patrol point')); this.refreshPanel(); } });
+      cmds.push({ icon: '✋', label: T('Stop (X)'), cls: 'cmd-act', fn: () => this.game.cmd('stop', { sel: units }) });
       // combat stance — shared value highlighted when the whole selection agrees
       const fighters = units.filter(u => u.def.attack && !u.def.worker);
       if (fighters.length) {
@@ -293,9 +294,9 @@ export class UI {
         const STANCES = [['aggressive', '⚔', 'Aggressive'], ['defensive', '🛡', 'Defensive'], ['hold', '⚓', 'Hold (Y)']];
         for (const [s, icon, label] of STANCES) {
           cmds.push({
-            icon, label, cls: 'cmd-act' + (allSame(s) ? ' cmd-on' : ''),
-            tip: `${label} stance — ${s === 'aggressive' ? 'hunt freely within sight'
-              : s === 'defensive' ? 'engage nearby but return to position' : 'stand ground; strike only what comes in range'}`,
+            icon, label: T(label), cls: 'cmd-act' + (allSame(s) ? ' cmd-on' : ''),
+            tip: `${T(label)}${L(' stance — ', ' 태세 - ')}${T(s === 'aggressive' ? 'hunt freely within sight'
+              : s === 'defensive' ? 'engage nearby but return to position' : 'stand ground; strike only what comes in range')}`,
             fn: () => { this.game.cmd('stance', { sel: fighters, s }); Sound.click(); this.refreshPanel(); },
           });
         }
@@ -308,14 +309,14 @@ export class UI {
       const ready = u.abilityCd <= 0;
       cmds.push({
         icon: ab.icon, label: `${ab.name} (Q)`,
-        sub: ready ? '— Ready —' : `${u.abilityCd.toFixed(1)} s`,
+        sub: ready ? T('— Ready —') : `${u.abilityCd.toFixed(1)} s`,
         cls: 'cmd-act cmd-ability' + (ready ? ' cmd-ability-ready' : ''),
         tip: ab.desc,
         fn: () => { this.game.cmd('ability', { u }); Sound.click(); this.refreshPanel(); },
       });
     }
     if (workers.length && !this.buildMenuOpen) {
-      cmds.push({ icon: '🏗', label: 'Build… (B)', cls: 'cmd-act', fn: () => { this.buildMenuOpen = true; this.refreshPanel(); } });
+      cmds.push({ icon: '🏗', label: T('Build… (B)'), cls: 'cmd-act', fn: () => { this.buildMenuOpen = true; this.refreshPanel(); } });
     }
     if (workers.length && this.buildMenuOpen) {
       for (const [key, def] of Object.entries(faction.buildings)) {
@@ -325,20 +326,20 @@ export class UI {
         cmds.push({
           icon: BLD_ICONS[key] || '🏛', label: `${def.name}`, sub: costStr(def.cost),
           disabled: !avail || !afford,
-          tip: `${def.name} — ${costStr(def.cost)}${def.requires ? ` (requires ${faction.buildings[def.requires].name})` : ''}\n${def.desc}`,
+          tip: `${def.name} — ${costStr(def.cost)}${def.requires ? L(` (requires ${faction.buildings[def.requires].name})`, ` (필요: ${faction.buildings[def.requires].name})`) : ''}\n${def.desc}`,
           fn: () => { this.controls.startPlacement(key); },
         });
       }
-      cmds.push({ icon: '↩', label: 'Back (Esc)', cls: 'cmd-act', fn: () => { this.buildMenuOpen = false; this.refreshPanel(); } });
+      cmds.push({ icon: '↩', label: T('Back (Esc)'), cls: 'cmd-act', fn: () => { this.buildMenuOpen = false; this.refreshPanel(); } });
     }
     if (building && building.def.main && building.complete) {
       const p = this.game.me;
       const ready = p.empowerCd <= 0;
       cmds.push({
-        icon: '⛟', label: 'Marshal Stores (G)',
-        sub: ready ? '— Ready —' : `${Math.ceil(p.empowerCd)} s`,
+        icon: '⛟', label: T('Marshal Stores (G)'),
+        sub: ready ? T('— Ready —') : `${Math.ceil(p.empowerCd)} s`,
         cls: 'cmd-act cmd-ability' + (ready ? ' cmd-ability-ready' : ''),
-        tip: 'Marshal the Stores — instant burst of grain & favor and a 10 s surge of gather speed. On a cooldown; keep it up between fights for a macro edge.',
+        tip: T('Marshal the Stores — instant burst of grain & favor and a 10 s surge of gather speed. On a cooldown; keep it up between fights for a macro edge.'),
         fn: () => { if (this.game.cmd('empower', { o: this.game.localPlayer })) Sound.click(); else Sound.error(); this.refreshPanel(); },
       });
     }
@@ -349,7 +350,7 @@ export class UI {
         cmds.push({
           icon: UNIT_ICONS[key] || '⚔', label: def.name, sub: costStr(def.cost),
           disabled: !avail,
-          tip: `${def.name} — ${costStr(def.cost)} ⌂${def.supply}${def.requires ? ` (requires ${faction.buildings[def.requires].name})` : ''}\n${def.desc}`,
+          tip: `${def.name} — ${costStr(def.cost)} ⌂${def.supply}${def.requires ? L(` (requires ${faction.buildings[def.requires].name})`, ` (필요: ${faction.buildings[def.requires].name})`) : ''}\n${def.desc}`,
           fn: () => { if (!this.game.cmd('train', { b: building, key })) Sound.error(); else Sound.click(); this.refreshPanel(); },
         });
       }
@@ -415,19 +416,19 @@ export class UI {
         bar.appendChild(b);
         return b;
       };
-      mk('⚔ Army', () => {
+      mk(T('⚔ Army'), () => {
         const n = this.controls.selectArmy();
-        if (n) { this.controls.snapToSelection(); Sound.click(); } else this.toast('No warriors in the field yet.');
-      }, null, 'Select every warrior you command');
+        if (n) { this.controls.snapToSelection(); Sound.click(); } else this.toast(T('No warriors in the field yet.'));
+      }, null, T('Select every warrior you command'));
       for (const k of ['1', '2', '3', '4']) {
         mk(k, (b) => {
           if (this.controls.groupSize(k)) { this.controls.recallGroup(k); this.controls.snapToSelection(); }
-          else this.toast(`Hold ${k} to bind the current selection to it.`);
+          else this.toast(L(`Hold ${k} to bind the current selection to it.`, `${k}를 길게 눌러 현재 선택을 이 부대에 지정하세요.`));
         }, (b) => {
           const n = this.controls.assignGroup(k);
-          this.toast(n ? `⚑ Group ${k} bound — ${n} under its banner.` : 'Select units first, then hold to bind.');
+          this.toast(n ? L(`⚑ Group ${k} bound — ${n} under its banner.`, `⚑ 부대 ${k} 지정 - ${n}개 유닛이 그 깃발 아래 섭니다.`) : T('Select units first, then hold to bind.'));
           this.refreshGroupBar();
-        }, `Tap: select group ${k} · Hold: bind selection`);
+        }, L(`Tap: select group ${k} · Hold: bind selection`, `탭: 부대 ${k} 선택 · 길게: 현재 선택 지정`));
       }
     }
     // live counts on the chips
@@ -486,8 +487,8 @@ export class UI {
     if (!dlg || !d) { this._dlgActive = false; dlg?.classList.remove('show'); return; }
     this._dlgActive = true;
     document.getElementById('dlg-portrait').src = d.portrait;
-    document.getElementById('dlg-name').textContent = d.name;
-    document.getElementById('dlg-line').textContent = d.line;
+    document.getElementById('dlg-name').textContent = T(d.name);
+    document.getElementById('dlg-line').textContent = T(d.line);
     dlg.classList.add('show');
     Sound.alert();
     clearTimeout(this._dlgT);
@@ -504,7 +505,7 @@ export class UI {
   toast(msg) {
     const el = document.createElement('div');
     el.className = 'toast';
-    el.textContent = msg;
+    el.textContent = T(msg);
     // battle alerts are tappable: touch has no Space key, so the toast itself jumps
     // the camera to the trouble
     if (/[⚠☠🌊]/.test(msg)) {
@@ -523,27 +524,27 @@ export class UI {
       const div = document.getElementById('gameover');
       div.style.display = 'flex';
       const g = this.game, survival = g.mode === 'survival', campaign = g.mode === 'campaign';
-      div.querySelector('h1').textContent = campaign ? (winner === 0 ? 'MISSION WON' : 'MISSION LOST')
-        : survival ? 'THE DELUGE' : winner === 0 ? 'VICTORY' : 'DEFEAT';
+      div.querySelector('h1').textContent = campaign ? (winner === 0 ? T('MISSION WON') : T('MISSION LOST'))
+        : survival ? T('THE DELUGE') : winner === 0 ? T('VICTORY') : T('DEFEAT');
       div.querySelector('h1').style.color = campaign ? (winner === 0 ? '#cbb8e6' : '#e05540')
         : survival ? '#5aa0ff' : winner === 0 ? '#ffd56e' : '#e05540';
       div.querySelector('p').textContent = campaign
-        ? (winner === 0 ? `Act ${this.campaign?.mission.act} complete — ${this.campaign?.mission.name}.` : `${this.campaign?.mission.name} — the Fields are not yet yours. Try again.`)
+        ? (winner === 0 ? L(`Act ${this.campaign?.mission.act} complete — ${this.campaign?.mission.name}.`, `제${this.campaign?.mission.act}막 완료 - ${this.campaign?.mission.name}.`) : L(`${this.campaign?.mission.name} — the Fields are not yet yours. Try again.`, `${this.campaign?.mission.name} - 들녘은 아직 당신의 것이 아닙니다. 다시 시도하세요.`))
         : survival
-        ? `The waters closed over your hall at wave ${g.wave}.${g.isDaily ? ' The Daily Trial is written.' : ' Stand longer next time.'}`
+        ? L(`The waters closed over your hall at wave ${g.wave}.${g.isDaily ? ' The Daily Trial is written.' : ' Stand longer next time.'}`, `웨이브 ${g.wave}에서 물이 전당을 덮었습니다.${g.isDaily ? ' 오늘의 시련이 기록되었습니다.' : ' 다음에는 더 오래 버텨보세요.'}`)
         : winner === 0
-          ? `The enemy's seat of power lies in ruin. The age endures — for now.${g.isDaily ? ' The Daily Trial is won.' : ''}`
-          : 'Your hall has fallen. The waters will remember your name.';
+          ? L(`The enemy's seat of power lies in ruin. The age endures — for now.${g.isDaily ? ' The Daily Trial is won.' : ''}`, `적의 권력의 자리가 폐허가 되었습니다. 시대는 계속됩니다 - 지금은.${g.isDaily ? ' 오늘의 시련을 달성했습니다.' : ''}`)
+          : T('Your hall has fallen. The waters will remember your name.');
       // post-match chronicle
       const s = g.stats, t = Math.floor(g.time);
       const dur = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
       let chron = div.querySelector('.go-stats');
       if (!chron) { chron = document.createElement('div'); chron.className = 'go-stats'; div.querySelector('p').after(chron); }
       chron.innerHTML =
-        (survival ? `<span>🌊 waves <b>${g.wave}</b></span>` : '') +
-        `<span>⏱ <b>${dur}</b></span><span>⚔ slain <b>${s.killed}</b></span>` +
-        `<span>☩ razed <b>${s.razed}</b></span><span>🕯 lost <b>${s.lost}</b></span>` +
-        `<span>⛏ raised <b>${s.trained}</b></span>`;
+        (survival ? `<span>🌊 ${L('waves', '웨이브')} <b>${g.wave}</b></span>` : '') +
+        `<span>⏱ <b>${dur}</b></span><span>⚔ ${L('slain', '처치')} <b>${s.killed}</b></span>` +
+        `<span>☩ ${L('razed', '파괴')} <b>${s.razed}</b></span><span>🕯 ${L('lost', '손실')} <b>${s.lost}</b></span>` +
+        `<span>⛏ ${L('raised', '훈련')} <b>${s.trained}</b></span>`;
       document.getElementById('btn-restart').onclick = () => this.onRestart();
       // campaign: a Next Mission (on a win) or Retry (on a loss) button
       const nextBtn = document.getElementById('btn-campaign-next');
@@ -551,10 +552,10 @@ export class UI {
         if (campaign) {
           nextBtn.style.display = 'inline-block';
           if (winner === 0) {
-            nextBtn.textContent = this.campaign?.hasNext ? 'Next Mission ▸' : 'The Chronicle Complete ✦';
+            nextBtn.textContent = this.campaign?.hasNext ? T('Next Mission ▸') : T('The Chronicle Complete ✦');
             nextBtn.onclick = () => this.onCampaignNext?.();
           } else {
-            nextBtn.textContent = '↻ Retry Mission';
+            nextBtn.textContent = T('↻ Retry Mission');
             nextBtn.onclick = () => this.onCampaignRetry?.();
           }
         } else nextBtn.style.display = 'none';
@@ -571,7 +572,7 @@ export class UI {
       if (sh) {
         if (g.isDaily) {
           sh.style.display = 'inline-block';
-          sh.textContent = '☀ Share Result';
+          sh.textContent = T('☀ Share Result');
           sh.onclick = () => this.shareDailyResult(winner, sh);
         } else sh.style.display = 'none';
       }
@@ -585,12 +586,12 @@ export class UI {
     const g = this.game, survival = g.mode === 'survival', s = g.stats;
     const t = Math.floor(g.time), dur = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
     const outcome = survival
-      ? `🌊 Held to wave ${g.wave} · ⏱ ${dur}`
-      : (winner === 0 ? `🏆 Victory · ⏱ ${dur}` : `💀 Fell · ⏱ ${dur}`);
+      ? L(`🌊 Held to wave ${g.wave} · ⏱ ${dur}`, `🌊 웨이브 ${g.wave}까지 생존 · ⏱ ${dur}`)
+      : (winner === 0 ? L(`🏆 Victory · ⏱ ${dur}`, `🏆 승리 · ⏱ ${dur}`) : L(`💀 Fell · ⏱ ${dur}`, `💀 패배 · ⏱ ${dur}`));
     const faction = g.me?.faction?.name || '';
     return [
-      `Shadow of the Watchers ☀ Daily ${g.isDaily}`,
-      `${faction} · ${survival ? 'The Deluge' : 'Conquest'} · Hard`,
+      L(`Shadow of the Watchers ☀ Daily ${g.isDaily}`, `Shadow of the Watchers ☀ 오늘의 시련 ${g.isDaily}`),
+      `${faction} · ${T(survival ? 'The Deluge' : 'Conquest')} · ${T('Hard')}`,
       outcome,
       `⚔ ${s.killed}  ☩ ${s.razed}  🕯 ${s.lost}  ⛏ ${s.trained}`,
     ].join('\n');
@@ -613,7 +614,7 @@ export class UI {
         ok = document.execCommand('copy'); document.body.removeChild(ta);
       } catch { ok = false; }
     }
-    if (btn) { btn.textContent = ok ? '✓ Copied!' : '⚠ Copy failed'; setTimeout(() => { btn.textContent = '☀ Share Result'; }, 2200); }
+    if (btn) { btn.textContent = ok ? T('✓ Copied!') : T('⚠ Copy failed'); setTimeout(() => { btn.textContent = T('☀ Share Result'); }, 2200); }
     if (ok) this.toast('☀ Daily result copied — share your fate.');
     return text;
   }
@@ -628,7 +629,7 @@ export class UI {
     const el = document.getElementById('introcard');
     document.getElementById('ic-name').textContent = faction.name;
     document.getElementById('ic-name').style.color = faction.colorCss;
-    document.getElementById('ic-sub').textContent = taglines[faction.key] || faction.desc;
+    document.getElementById('ic-sub').textContent = T(taglines[faction.key] || faction.desc);
     el.style.display = 'flex';
     requestAnimationFrame(() => el.classList.add('show'));
   }
@@ -638,6 +639,9 @@ export class UI {
     el.classList.remove('show');
     setTimeout(() => { el.style.display = 'none'; }, 1100);
   }
+
+  // 언어 전환 시 즉시 HUD를 다시 그린다.
+  onLangChanged() { this.refreshPanel(); this.drawResources(); }
 
   // ---------- per-frame ----------
   update(dt) {
@@ -652,7 +656,7 @@ export class UI {
       if (objP) {
         if (this.game.mode === 'campaign' && !this.game.over && this.game.objective) {
           objP.style.display = 'block';
-          document.getElementById('objective-text').textContent = this.game.objective;
+          document.getElementById('objective-text').textContent = T(this.game.objective);
         } else objP.style.display = 'none';
       }
       // live-refresh queue/progress text when a building is selected,
