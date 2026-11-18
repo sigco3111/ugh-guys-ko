@@ -3,11 +3,8 @@ name: Deploy landing page to GitHub Pages
 # The playable game is deployed on Vercel (production). GitHub Pages serves the
 # marketing/landing page in landing/, which links out to the Vercel build.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'landing/**'
-      - '.github/workflows/deploy.yml'
+  # 한글판에서는 게임(pages.yml)이 Pages에 배포되므로, 랜딩 페이지 자동 배포가
+  # 게임 사이트를 덮어쓰지 않도록 push 트리거는 끕니다. 필요 시 수동 실행만 합니다.
   workflow_dispatch:
 
 permissions:
